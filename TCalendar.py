@@ -27,28 +27,62 @@ class TreeCalendar(ttk.Frame):
         Actual Widget
 
         ________________________________________________
+                        self.year_frame
+                        self.month_frame
+                        self.tree_frame
 
 
         """
 
         ttk.Frame.__init__(self, master)  # Base frame
-        # *************************************************************************************************************
-        # Month - Year frame
-        # *************************************************************************************************************
-        self.month_year_frame = ttk.Frame(self)
-        self.month_year = str(self.datetime.month)
-        self.month_year_label = ttk.Label(self.month_year_frame, text=self.month_year)
+        style = ttk.Style()
+        passed_kws = list(kw.keys())  # Properties passed by user
 
-        self.month_year_label.pack()
+        print(passed_kws)
+        # *************************************************************************************************************
+        # Takes in properties
+        # *************************************************************************************************************
+        options = [
+            'background',
+            'foreground',
+            'activebackground',
+
+        ]
+        for passed in passed_kws:  # Clears bad arguments kws
+            if passed not in options:
+                del(kw[passed])
+
+        self._selected_options = {
+            'background': 'white',
+            'foreground': 'green',
+            'activebackground': 'grey'
+        }
+        self._selected_options.update(kw)  # Updates defaults with user kws
+        # *************************************************************************************************************
+        # self.year_frame
+        # *************************************************************************************************************
+        self.year_frame = ttk.Frame(self)
+        self.year = str(self.datetime.year)
+        self.year_label = ttk.Label(self.year_frame, text=self.year)
+        self.year_forward_button = ttk.Button()
+
+        self.year_label.pack()
+        # *************************************************************************************************************
+        # self.month_frame
+        # *************************************************************************************************************
+        self.month_frame = ttk.Frame(self)
+        self.month = str(self.datetime.month)
+        self.month_label = ttk.Label(self.month_frame, text=self.month, background=self._selected_options['background'])
+
+        self.month_label.pack()
         # *************************************************************************************************************
         # self.tree_frame
         # *************************************************************************************************************
         self.tree_frame = ttk.Frame(self)
 
-        style = ttk.Style()
-
-        style.configure('Treeview', background='white', foreground='green', activebackground='grey')
-        style.configure('Treeview.Heading', foreground='green', background='grey')
+        style.configure('Treeview', background=self._selected_options['background'],
+                        foreground='green', activebackground='grey')
+        style.configure('Treeview.Heading', foreground=self._selected_options['foreground'], background='grey')
 
         self.tree_headers = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat']
 
@@ -79,5 +113,6 @@ class TreeCalendar(ttk.Frame):
         # *************************************************************************************************************
         # Frame packing
         # *************************************************************************************************************
-        self.month_year_frame.grid(column=0, row=0)
-        self.tree_frame.grid(column=0, row=1)
+        self.year_frame.grid(column=0, row=0)
+        self.month_frame.grid(column=0, row=1)
+        self.tree_frame.grid(column=0, row=2)
