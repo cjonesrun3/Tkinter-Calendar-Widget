@@ -36,6 +36,7 @@ class TreeCalendar(ttk.Frame):
         ttk.Frame.__init__(self, master)  # Base frame
         self.style = ttk.Style(self)
         self.style.theme_use('clam')  # Ensures treeview initiates with activebackground
+
         passed_kws = list(kw.keys())  # Properties passed by user
         # *************************************************************************************************************
         # Takes in properties
@@ -62,12 +63,12 @@ class TreeCalendar(ttk.Frame):
         self._selected_options = {
             'background': 'white',
             'foreground': 'green',
-            'activebackground': 'grey',
-            'fieldbackground': 'grey',
+            'activebackground': 'white',
+            'fieldbackground': 'white',
             'font': 'Helvetica',
             'fontsize': 12,
             'calendarcolumnwidth': 45,
-            'calendarheight': 10,
+            'calendarheight': 6,
             'alternatingrowcolor': 'ENABLED',
             'evenrowcolor': 'grey',
             'oddrowcolor': 'white',
@@ -146,30 +147,31 @@ class TreeCalendar(ttk.Frame):
         self.tree_frame = ttk.Frame(self)
         self.tree_frame.configure(style='TFrame')
 
-        self.tree_headers = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat']
+        self.tree_headers = ['Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat', 'Sun']
 
         self.tree = ttk.Treeview(self.tree_frame, columns=self.tree_headers)
 
         self.tree['show'] = 'headings'
         self.tree.configure(height=int(self._selected_options.get('calendarheight')))
-        self.tree.heading('Sun', text='Sun', anchor=W)
-        self.tree.heading('Mon', text='Mon', anchor=W)
-        self.tree.heading('Tue', text='Tue', anchor=W)
-        self.tree.heading('Wed', text='Wed', anchor=W)
-        self.tree.heading('Thur', text='Thur', anchor=W)
-        self.tree.heading('Fri', text='Fri', anchor=W)
-        self.tree.heading('Sat', text='Sat', anchor=W)
+        self.tree.heading('Mon', text='Mon', anchor=N)
+        self.tree.heading('Tue', text='Tue', anchor=N)
+        self.tree.heading('Wed', text='Wed', anchor=N)
+        self.tree.heading('Thr', text='Thr', anchor=N)
+        self.tree.heading('Fri', text='Fri', anchor=N)
+        self.tree.heading('Sat', text='Sat', anchor=N)
+        self.tree.heading('Sun', text='Sun', anchor=N)
 
         self.set_tree_column_width = int(self._selected_options.get('calendarcolumnwidth'))
-        self.tree.column('Sun', width=self.set_tree_column_width)
-        self.tree.column('Mon', width=self.set_tree_column_width)
-        self.tree.column('Tue', width=self.set_tree_column_width)
-        self.tree.column('Wed', width=self.set_tree_column_width)
-        self.tree.column('Thur', width=self.set_tree_column_width)
-        self.tree.column('Fri', width=self.set_tree_column_width)
-        self.tree.column('Sat', width=self.set_tree_column_width)
 
-        self.tree.pack()
+        self.tree.column('Mon', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Tue', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Wed', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Thr', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Fri', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Sat', width=self.set_tree_column_width, anchor=N)
+        self.tree.column('Sun', width=self.set_tree_column_width, anchor=N)
+
+        self.tree.pack(fill=BOTH, expand=1)
         # *************************************************************************************************************
         # Frame packing
         # *************************************************************************************************************
@@ -177,5 +179,56 @@ class TreeCalendar(ttk.Frame):
         self.month_frame.grid(column=0, row=1)
         self.tree_frame.grid(column=0, row=2)
 
+        self.tree.bind('<Button-1>', self.selectItem)
+
+
+        self._update_calendar()
+
+    def _update_calendar(self):
+        current_year = self.date.today().year
+        current_month = self.date.today().month
+        # Below returns the first weekday of the month and number of days in the month
+        current_month = calendar.monthcalendar(current_year, current_month)
+
+        for day in current_month:
+            print(day)
+            self.tree.insert('', 'end', values=(day))  # INSERTS DATA INTO TREEVIEW
+
+
+
+
+
+    def selectItem(self, event):
+        curItem = self.tree.item(self.tree.focus())
+        col = self.tree.identify_column(event.x)
+
+        if col == '#1':
+            cell_value = curItem['values'][0]
+        elif col == '#2':
+            cell_value = curItem['values'][1]
+        elif col == '#3':
+            cell_value = curItem['values'][2]
+        elif col == '#4':
+            cell_value = curItem['values'][3]
+        elif col == '#5':
+            cell_value = curItem['values'][4]
+        elif col == '#6':
+            cell_value = curItem['values'][5]
+        elif col == '#7':
+            cell_value = curItem['values'][6]
+
+        print('cell_value = ', cell_value)
+        print(type(cell_value))
+
+
+
+
+"""
+TODO:
+1) Possibly use global month number and year variable to ensure smooth transition of months and years
+2) Figure out how to pull data
+
+
+"""
 
 

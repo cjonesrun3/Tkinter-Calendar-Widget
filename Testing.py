@@ -5,6 +5,7 @@ from tkinter import ttk
 from TCalendar import TreeCalendar
 
 root = tk.Tk()
+root.configure(background='yellow')
 a = TreeCalendar(root)
 a.pack()
 b = ttk.Button(root, text='BUUTAN')
