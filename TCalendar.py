@@ -1,9 +1,10 @@
 # !Python3
-# 26APR2019
+# 29SEP2019
 # BY: C.R. JONES
 # PYTHON VERSION 3.6.1
 """
-This is my attempt to utilize the treeview widget to create a calendar widget.
+This is a simple calendar widget using the treeview widget as the calendar. It returns a datetime object when a user
+clicks on a date.
 
 
 """
@@ -36,6 +37,8 @@ class TreeCalendar(ttk.Frame):
         ttk.Frame.__init__(self, master)  # Base frame
         self.style = ttk.Style(self)
         self.style.theme_use('clam')  # Ensures treeview initiates with activebackground
+        self.currently_displayed_year = StringVar()  # Keeps track of currently displayed year
+        self.currently_displayed_month = StringVar()  # Keeps track of currently displayed month
 
         passed_kws = list(kw.keys())  # Properties passed by user
         # *************************************************************************************************************
@@ -94,6 +97,15 @@ class TreeCalendar(ttk.Frame):
                           [('Button.focus',
                             {'children': [('Button.rightarrow', None)]})])
 
+        self.style.configure('R.TButton', background=selected_background,
+                             arrowcolor=selected_foreground, bordercolor=selected_background,
+                             relief="flat", lightcolor=selected_background, darkcolor=selected_background,
+                             arrowsize=int(selected_arrowsize))
+
+        self.style.configure('L.TButton', background=selected_background, arrowcolor=selected_foreground,
+                             bordercolor=selected_background, relief="flat", lightcolor=selected_background,
+                             darkcolor=selected_background, arrowsize=int(selected_arrowsize))
+
         self.style.configure('TFrame', background=selected_background)
 
         self.style.configure('Treeview', background=selected_background,
@@ -105,22 +117,12 @@ class TreeCalendar(ttk.Frame):
 
         self.style.configure('TLabel', background=selected_background, font=(selected_font, int(selected_fontsize)))
 
-        self.style.configure('R.TButton', background=selected_background,
-                             arrowcolor=selected_foreground, bordercolor=selected_background,
-                             relief="flat", lightcolor=selected_background, darkcolor=selected_background,
-                             arrowsize=int(selected_arrowsize))
-
-        self.style.configure('L.TButton', background=selected_background, arrowcolor=selected_foreground,
-                             bordercolor=selected_background, relief="flat", lightcolor=selected_background,
-                             darkcolor=selected_background, arrowsize=int(selected_arrowsize))
-
         # *************************************************************************************************************
         # self.year_frame
         # *************************************************************************************************************
         self.year_frame = ttk.Frame(self)
         self.year_frame.configure(style='TFrame')
-        self.year = str(self.date.today().year)
-        self.year_label = ttk.Label(self.year_frame, text=self.year, style='TLabel')
+        self.year_label = ttk.Label(self.year_frame, textvariable=self.currently_displayed_year, style='TLabel')
         self.year_forward_button = ttk.Button(self.year_frame, style='R.TButton')
         self.year_back_button = ttk.Button(self.year_frame, style='L.TButton')
 
@@ -133,9 +135,9 @@ class TreeCalendar(ttk.Frame):
         # *************************************************************************************************************
         self.month_frame = ttk.Frame(self)
         self.month_frame.configure(style='TFrame')
-        self.month = str(self.date.today().strftime('%B'))
-        self.month_label = ttk.Label(self.month_frame, text=self.month, style='TLabel')
-        self.month_forward_button = ttk.Button(self.month_frame, style='R.TButton')
+        self.month_label = ttk.Label(self.month_frame, textvariable=self.currently_displayed_month, style='TLabel')
+        self.month_forward_button = ttk.Button(self.month_frame, style='R.TButton',
+                                               command=self._refresh_calendar_month_forward)
         self.month_back_button = ttk.Button(self.month_frame, style='L.TButton')
 
         self.month_back_button.grid(column=0, row=0)
@@ -178,47 +180,106 @@ class TreeCalendar(ttk.Frame):
         self.year_frame.grid(column=0, row=0)
         self.month_frame.grid(column=0, row=1)
         self.tree_frame.grid(column=0, row=2)
+        # *************************************************************************************************************
+        # Bindings
+        # *************************************************************************************************************
+        # Using single click as a binding generally raises index errors and results in the current selectection being
+        # In the same column, but often the wrong value. Double click doesn't have this issue.
+        self.tree.bind('<Double-Button-1>', self._select_date)
+        # *************************************************************************************************************
 
-        self.tree.bind('<Button-1>', self.selectItem)
+        self._initialize_calendar()
 
-
-        self._update_calendar()
-
-    def _update_calendar(self):
+    def _initialize_calendar(self):
         current_year = self.date.today().year
-        current_month = self.date.today().month
+        current_month = self.date.today().month  # Current numerical month
+        current_written_month = self.date.today().strftime('%B')  # Current month written out
+
+        self.currently_displayed_year.set(current_year)  # Sets label to current year
+        self.currently_displayed_month.set(current_written_month)  # Sets label to current month
+
         # Below returns the first weekday of the month and number of days in the month
         current_month = calendar.monthcalendar(current_year, current_month)
+        """
+        e.g.
+        September 2019
+        [0, 0, 0, 0, 0, 0, 1]
+        [2, 3, 4, 5, 6, 7, 8]
+        [9, 10, 11, 12, 13, 14, 15]
+        [16, 17, 18, 19, 20, 21, 22]
+        [23, 24, 25, 26, 27, 28, 29]
+        [30, 0, 0, 0, 0, 0, 0]
+        
+        """
 
         for day in current_month:
             print(day)
             self.tree.insert('', 'end', values=(day))  # INSERTS DATA INTO TREEVIEW
 
 
+    def _refresh_calendar_month_forward(self, event=None):
+        self.tree.delete(*self.tree.get_children())  # Clears treeview days
+        numerical_month = list(calendar.month_abbr).index(self.month_label.cget('text')[:3])  # Numerical value of month
+        year = int(self.year_label.cget('text'))  # Retrieves currently displayed year
+        month_forward_value = int(numerical_month) + 1  # Adds one month to current month
+
+        if month_forward_value >= 13:  # Accounts for user advancing year via months aka Dec - Jan
+            month_forward_value = 1  # Resets month value to January
+            year = year + 1  # Adds one year to reflect advancement
+        else:
+            pass
+
+        month_forward_calendar = calendar.monthcalendar(year, month_forward_value)  # Builds calendar
+
+        for day in month_forward_calendar:
+            self.tree.insert('', 'end', values=(day))  # Inserts data into treeview
+
+        next_written_month = calendar.month_name[month_forward_value]  # Retrieves month name by value
+        self.currently_displayed_month.set(next_written_month)  # Sets labels for users
+        self.currently_displayed_year.set(year)  # Sets labels for users
+
+    def _refresh_calendar_year_forward(self, event=None):
+        pass
 
 
 
-    def selectItem(self, event):
-        curItem = self.tree.item(self.tree.focus())
+
+
+
+
+
+    def _select_date(self, event):
+        selected_day = self.tree.item(self.tree.focus())
         col = self.tree.identify_column(event.x)
 
         if col == '#1':
-            cell_value = curItem['values'][0]
+            cell_value = selected_day['values'][0]
         elif col == '#2':
-            cell_value = curItem['values'][1]
+            cell_value = selected_day['values'][1]
         elif col == '#3':
-            cell_value = curItem['values'][2]
+            cell_value = selected_day['values'][2]
         elif col == '#4':
-            cell_value = curItem['values'][3]
+            cell_value = selected_day['values'][3]
         elif col == '#5':
-            cell_value = curItem['values'][4]
+            cell_value = selected_day['values'][4]
         elif col == '#6':
-            cell_value = curItem['values'][5]
+            cell_value = selected_day['values'][5]
         elif col == '#7':
-            cell_value = curItem['values'][6]
+            cell_value = selected_day['values'][6]
 
-        print('cell_value = ', cell_value)
-        print(type(cell_value))
+        print('cell_value = %s' % cell_value)
+        """
+        The returned output is assembled by using the cget method to retrieve the currently displayed year. Since the 
+        month is displayed with the name of the month rather than the numerical value necessary to return a datetime
+        object, numerical_month returns the numerical value via the calendar module. It looks up the numerical value
+        by month abbreviation, so I splice the month label to the first three letters. The day is the selected_day
+        that the user has clicked on. 
+        """
+        numerical_month = list(calendar.month_abbr).index(self.month_label.cget('text')[:3])
+        output_date = self.date(int(self.year_label.cget('text')), int(numerical_month), cell_value)
+        print(output_date)
+
+
 
 
 
