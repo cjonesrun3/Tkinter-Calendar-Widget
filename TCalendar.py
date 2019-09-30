@@ -2,6 +2,7 @@
 # 29SEP2019
 # BY: C.R. JONES
 # PYTHON VERSION 3.6.1
+
 """
 This is a simple calendar widget using the treeview widget as the calendar. It returns a datetime object when a user
 clicks on a date.
@@ -9,10 +10,15 @@ clicks on a date.
 
 """
 
-
 import calendar
-from tkinter import *
-from tkinter import ttk
+try:
+    import tkinter as tk
+    from tkinter import ttk
+    from tkinter import *
+except ImportError:
+    import Tkinter as tk
+    import ttk
+    from tkinter import *
 
 
 class TreeCalendar(ttk.Frame):
@@ -21,17 +27,28 @@ class TreeCalendar(ttk.Frame):
     timedelta = calendar.datetime.timedelta
     strptime = calendar.datetime.datetime.strptime
 
-
     def __init__(self, master=None, **kw):
         """
-        Actual Widget
+        Start of widget
 
         ________________________________________________
                         self.year_frame
                         self.month_frame
                         self.tree_frame
 
+        Configuration Options:
 
+        Option                                                                      Accepts Data type
+        background - Will change background for buttons, frames, and treeview               Str
+        foreground - Arrow colors, treeview text headers, dates                             Str
+        activebackground -                                                                  Str
+        fieldbackground - Treeview fluctuates number of rows. When there's less,
+        this color will show                                                                Str
+        font - Year and month label                                                         Str
+        fontsize - Calendar dates, Year label, month label                                  int or Str
+        calendarcolumnwidth - Calendar columns width                                        int or Str
+        calendarheight - Height of the calendar                                             int or Str
+        arrowsize - Size of arrors on buttons                                               int or Str
         """
 
         ttk.Frame.__init__(self, master)  # Base frame
@@ -53,9 +70,6 @@ class TreeCalendar(ttk.Frame):
             'fontsize',
             'calendarcolumnwidth',
             'calendarheight',
-            'alternatingrowcolor',
-            'evenrowcolor',
-            'oddrowcolor',
             'arrowsize'
 
         ]
@@ -72,9 +86,6 @@ class TreeCalendar(ttk.Frame):
             'fontsize': 12,
             'calendarcolumnwidth': 45,
             'calendarheight': 6,
-            'alternatingrowcolor': 'ENABLED',
-            'evenrowcolor': 'grey',
-            'oddrowcolor': 'white',
             'arrowsize': 30
 
         }
@@ -108,11 +119,13 @@ class TreeCalendar(ttk.Frame):
 
         self.style.configure('TFrame', background=selected_background)
 
-        self.style.configure('Treeview', background=selected_background,
-                             foreground=selected_foreground, activebackground=selected_activebackground,
-                             fieldbackground=selected_fieldbackground)
+        self.style.layout('Cal.Treeview')  # Unique designation to avoid interfering with other treeviews
 
-        self.style.configure('Treeview.Heading', foreground=selected_foreground, background=selected_background,
+        self.style.configure('Cal.Treeview', background=selected_background, relief='raised',
+                             foreground=selected_foreground, activebackground=selected_activebackground,
+                             fieldbackground=selected_fieldbackground, font=(selected_font, int(selected_fontsize)))
+
+        self.style.configure('Cal.Treeview.Heading', foreground=selected_foreground, background=selected_background,
                              activebackground=selected_activebackground, font=(selected_font, int(selected_fontsize)))
 
         self.style.configure('TLabel', background=selected_background, font=(selected_font, int(selected_fontsize)))
@@ -154,7 +167,7 @@ class TreeCalendar(ttk.Frame):
 
         self.tree_headers = ['Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat', 'Sun']
 
-        self.tree = ttk.Treeview(self.tree_frame, columns=self.tree_headers)
+        self.tree = ttk.Treeview(self.tree_frame, columns=self.tree_headers, style='Cal.Treeview')
 
         self.tree['show'] = 'headings'
         self.tree.configure(height=int(self._selected_options.get('calendarheight')))
@@ -243,10 +256,11 @@ class TreeCalendar(ttk.Frame):
 
         for day in current_month_calendar:
             if day == current_month_calendar[0]:
-                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Inserts data into treeview
+                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Adds tag for _select_date function
+            elif day == current_month_calendar[-1]:
+                self.tree.insert('', 'end', values=(day), tag='LastWeek')  # Adds tag for _select_date function
             else:
-                self.tree.insert('', 'end', values=(day))  # Inserts data into treeview
-
+                self.tree.insert('', 'end', values=(day), tag='CentralWeek')  # Inserts data into treeview
 
     def _refresh_calendar_month_forward(self, event=None):
         self.tree.delete(*self.tree.get_children())  # Clears treeview days
@@ -285,7 +299,12 @@ class TreeCalendar(ttk.Frame):
                 beggining_of_next_month_days += 1
 
         for day in month_forward_calendar:
-            self.tree.insert('', 'end', values=(day))  # Inserts data into treeview
+            if day == month_forward_calendar[0]:
+                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Adds tag for _select_date function
+            elif day == month_forward_calendar[-1]:
+                self.tree.insert('', 'end', values=(day), tag='LastWeek')  # Adds tag for _select_date_function
+            else:
+                self.tree.insert('', 'end', values=(day), tag='CentralWeek')  # Inserts data into treeview
 
         next_written_month = calendar.month_name[month_forward_value]  # Retrieves month name by value
         self.currently_displayed_month.set(next_written_month)  # Sets labels for users
@@ -321,7 +340,12 @@ class TreeCalendar(ttk.Frame):
                 beggining_of_next_month_days += 1
 
         for day in year_forward_calendar:
-            self.tree.insert('', 'end', values=(day))  # Inserts data into treeview
+            if day == year_forward_calendar[0]:
+                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Inserts data into treeview
+            elif day == year_forward_calendar[-1]:
+                self.tree.insert('', 'end', values=(day), tag='LastWeek')
+            else:
+                self.tree.insert('', 'end', values=(day), tag='CentralWeek')  # Inserts data into treeview
 
         self.currently_displayed_year.set(year_forward_value)  # Sets label to year + 1
 
@@ -362,7 +386,12 @@ class TreeCalendar(ttk.Frame):
                 beggining_of_next_month_days += 1
 
         for day in month_back_calendar:
-            self.tree.insert('', 'end', values=(day))  # Inserts data into treeview
+            if day == month_back_calendar[0]:
+                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Inserts data into treeview
+            elif day == month_back_calendar[-1]:
+                self.tree.insert('', 'end', values=(day), tag='LastWeek')
+            else:
+                self.tree.insert('', 'end', values=(day), tag='CentralWeek')  # Inserts data into treeview
 
         previous_written_month = calendar.month_name[month_back_value]  # Retrieves month name by value
         self.currently_displayed_year.set(year)  # Sets label to year
@@ -398,96 +427,94 @@ class TreeCalendar(ttk.Frame):
                 beggining_of_next_month_days += 1
 
         for day in year_back_calendar:
-            self.tree.insert('', 'end', values=(day))
+            if day == year_back_calendar[0]:
+                self.tree.insert('', 'end', values=(day), tag='FirstWeek')  # Inserts data into treeview
+            elif day == year_back_calendar[-1]:
+                self.tree.insert('', 'end', values=(day), tag='LastWeek')
+            else:
+                self.tree.insert('', 'end', values=(day), tag='CentralWeek')  # Inserts data into treeview
 
         self.currently_displayed_year.set(year_back_value)
-
 
     def _select_date(self, event):
         selected_day = self.tree.item(self.tree.focus())  # Item clicked
         col = self.tree.identify_column(event.x)  # North/South columns returns data from entire row
-        row = self.tree.identify_row(event.y)
-        print(selected_day.items())
-
 
         # variable and changed based on selection. Otherwise, you can select a date from the previous month, but
         # It will return a datetime with the month the user is currently on
         numerical_month = list(calendar.month_abbr).index(self.month_label.cget('text')[:3])
         numerical_year = int(self.year_label.cget('text'))
 
-        month_of_date_selected = 0  # Initializing as current displayed month
-        year_of_date_selected = 0  # Initializing as current displayed year
+        cell_value = ''  # Str value for clicked on cell
 
-        if col == '#1':
-            print('column 1')
-            if selected_day['tags'][0] == 'FirstWeek':  # Checks first row for numbers from previous month
-                print('This is a first row variabl')
+        if col == '#1':  # Columns run North/South on treeview each column is called out individually
+            if selected_day['tags'][0] == 'FirstWeek':  # Checks first row for numbers from previous month via tag
                 if selected_day['values'][0] > 7:
-                    month_of_date_selected = numerical_month - 1
-                    print('modifying')
-                    print(month_of_date_selected)
-            elif row == 'I006':  # Checks last row for number in next month
+                    numerical_month = numerical_month - 1
+
+            elif selected_day['tags'][0] == 'LastWeek':  # Checks last row for number in next month via tag
                 if selected_day['values'][0] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
+
             cell_value = selected_day['values'][0]
 
-
         elif col == '#2':
-            if row == 'I001':
+            if selected_day['tags'][0] == 'FirstWeek':
                 if selected_day['values'][1] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
+                    numerical_month = numerical_month - 1
+            elif selected_day['tags'][0] == 'LastWeek':
                 if selected_day['values'][1] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
             cell_value = selected_day['values'][1]
 
         elif col == '#3':
-            if row == 'I001':
+            if selected_day['tags'][0] == 'FirstWeek':
                 if selected_day['values'][2] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
+                    numerical_month = numerical_month - 1
+            elif selected_day['tags'][0] == 'LastWeek':
                 if selected_day['values'][2] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
             cell_value = selected_day['values'][2]
 
         elif col == '#4':
-            if row == 'I001':
+            if selected_day['tags'][0] == 'FirstWeek':
                 if selected_day['values'][3] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
+                    numerical_month = numerical_month - 1
+            elif selected_day['tags'][0] == 'LastWeek':
                 if selected_day['values'][3] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
             cell_value = selected_day['values'][3]
 
-
         elif col == '#5':
-            if row == 'I001':
+            if selected_day['tags'][0] == 'FirstWeek':
                 if selected_day['values'][4] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
+                    numerical_month = numerical_month - 1
+            elif selected_day['tags'][0] == 'LastWeek':
                 if selected_day['values'][4] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
             cell_value = selected_day['values'][4]
 
         elif col == '#6':
-            if row == 'I001':
+            if selected_day['tags'][0] == 'FirstWeek':
                 if selected_day['values'][5] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
+                    numerical_month = numerical_month - 1
+            elif selected_day['tags'][0] == 'LastWeek':
                 if selected_day['values'][5] < 7:
-                    month_of_date_selected = numerical_month + 1
+                    numerical_month = numerical_month + 1
             cell_value = selected_day['values'][5]
 
-        elif col == '#7':
-            if row == 'I001':
-                if selected_day['values'][6] > 7:
-                    month_of_date_selected = numerical_month - 1
-            elif row == 'I006':
-                if selected_day['values'][6] < 7:
-                    month_of_date_selected = numerical_month + 1
-            cell_value = selected_day['values'][6]
+        elif col == '#7':  # Column 7 has try/except for extra column that will occur in months with less columns
+            try:
+                if selected_day['tags'][0] == 'FirstWeek':
+                    if selected_day['values'][6] > 7:
+                        numerical_month = numerical_month - 1
+                elif selected_day['tags'][0] == 'LastWeek':
+                    if selected_day['values'][6] < 7:
+                        numerical_month = numerical_month + 1
+                cell_value = selected_day['values'][6]
+            except IndexError:
+                pass
 
-        print('cell_value = %s' % cell_value)
         """
         The returned output is assembled by using the cget method to retrieve the currently displayed year. Since the 
         month is displayed with the name of the month rather than the numerical value necessary to return a datetime
@@ -495,20 +522,21 @@ class TreeCalendar(ttk.Frame):
         by month abbreviation, so I splice the month label to the first three letters. The day is the selected_day
         that the user has clicked on. 
         """
-        print(month_of_date_selected)
-        print(year_of_date_selected)
+        if numerical_month == 13:  # This catches transitions in year. This would catch clicking a date 1 year ahead
+            numerical_year = numerical_year + 1
+            numerical_month = 1
 
-        if month_of_date_selected == 0:
-            month_of_date_selected = numerical_month
-        if year_of_date_selected == 0:
-            year_of_date_selected = numerical_year
-        output_date = self.date(year_of_date_selected, month_of_date_selected, cell_value)
-        print(output_date)
+        if numerical_month == 0:  # This catches clicking a date that's a year back
+            numerical_year = numerical_year - 1
+            numerical_month = 12
+
+        try:
+            output_date = self.date(numerical_year, numerical_month, cell_value)
+            print(output_date)
+            return output_date
+        except TypeError:
+            pass
         # TODO Figure out return
-
-
-
-
 
 
 """
