@@ -199,7 +199,7 @@ class TreeCalendar(ttk.Frame):
         # *************************************************************************************************************
         # Bindings
         # *************************************************************************************************************
-        # Using single click as a binding generally raises index errors and results in the current selectection being
+        # Using single click as a binding generally raises index errors and results in the current selection being
         # In the same column, but often the wrong value. Double click doesn't have this issue.
         self.tree.bind('<Double-Button-1>', self._select_date)
         # *************************************************************************************************************
@@ -531,12 +531,25 @@ class TreeCalendar(ttk.Frame):
             numerical_month = 12
 
         try:
-            output_date = self.date(numerical_year, numerical_month, cell_value)
-            print(output_date)
-            return output_date
+            self._output_date = self.date(numerical_year, numerical_month, cell_value)
+
         except TypeError:
             pass
-        # TODO Figure out return
+
+
+    def send_selected(self):
+        """
+        Returns datetime object back to user
+
+        """
+        try:
+            return self._output_date
+
+        except AttributeError:
+            pass
+
+
+
 
 
 """
