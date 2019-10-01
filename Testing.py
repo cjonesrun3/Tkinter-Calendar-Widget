@@ -3,11 +3,11 @@ import tkinter as tk
 from tkinter import ttk
 from TCalendar import TreeCalendar
 
-def alternate():
+def retrieve_date_via_button():
     k = a.send_selected()
     print(k)
 
-def open_it(event):
+def event_driven_date(event):
     """
     Use send_selected() method to get return datetime
 
@@ -19,22 +19,31 @@ def open_it(event):
     print(g.day)
 
 root = tk.Tk()
-root.configure()
-a = TreeCalendar(root)
-root.bind('<Double-Button-1>', open_it)
-a.pack()
-b = ttk.Button(root, text='BUUTAN', command=alternate)
 
+a = TreeCalendar(root, background='red', foreground='blue', activebackground='yellow', fieldbackground='black',
+                 fontsize='15', calendarcolumnwidth='50', calendarheight='5', arrowsize=50)
+root.bind('<Double-Button-1>', event_driven_date)
+a.pack()
+
+b = ttk.Button(root, text='Get Date', command=retrieve_date_via_button)
 
 b.pack()
+
 root.mainloop()
 """
-background='red', foreground='blue', activebackground='yellow', fieldbackground='black',
-                 fontsize='20', calendarcolumnwidth='100', calendarheight='20', arrowsize=30
+Default configuration for TreeCalendar
 
-
-
+'background': 'white',
+'foreground': 'green',
+'activebackground': 'white',
+'fieldbackground': 'white',
+'font': 'Helvetica',
+'fontsize': 12,
+'calendarcolumnwidth': 45,
+'calendarheight': 6,
+'arrowsize': 30
 
 
 
 """
+

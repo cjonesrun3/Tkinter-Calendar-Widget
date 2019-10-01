@@ -549,13 +549,7 @@ class TreeCalendar(ttk.Frame):
             pass
 
 
-
-
-
 """
-TODO:
-1) Possibly use global month number and year variable to ensure smooth transition of months and years
-2) Figure out how to pull data
 
 
 """
