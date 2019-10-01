@@ -201,7 +201,7 @@ class TreeCalendar(ttk.Frame):
         # *************************************************************************************************************
         # Using single click as a binding generally raises index errors and results in the current selection being
         # In the same column, but often the wrong value. Double click doesn't have this issue.
-        self.tree.bind('<Double-Button-1>', self._select_date)
+        self.tree.bind('<ButtonRelease-1>', self._select_date)  # Double
         # *************************************************************************************************************
 
         self._initialize_calendar()

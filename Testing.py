@@ -4,19 +4,26 @@ from tkinter import ttk
 from TCalendar import TreeCalendar
 
 def retrieve_date_via_button():
+    """
+    Single click desired date and hit button
+
+    """
     k = a.send_selected()
     print(k)
 
 def event_driven_date(event):
     """
-    Use send_selected() method to get return datetime
+    Retrieves date on double click by user
 
     """
-    g = a.send_selected()
-    print(g)
-    print(g.year)
-    print(g.month)
-    print(g.day)
+    try:
+        g = a.send_selected()
+        print(g)
+        print(g.year)
+        print(g.month)
+        print(g.day)
+    except AttributeError:
+        pass
 
 root = tk.Tk()
 
