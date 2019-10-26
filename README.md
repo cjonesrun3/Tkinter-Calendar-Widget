@@ -18,7 +18,7 @@ def retrieve_date_via_button():
     """
     Single click desired date and hit button
     """
-    k = a.send_selected()
+    k = a.send_selected()  # send_selected() method retrieves datetime object
     print(k)
 
 def event_driven_date(event):
@@ -41,9 +41,9 @@ a = TreeCalendar(root, background='red', foreground='blue', activebackground='ye
 root.bind('<Double-Button-1>', event_driven_date)
 a.pack()
 
-b = ttk.Button(root, text='Get Date', command=retrieve_date_via_button)
+get_date_of_selected_date_by_button = ttk.Button(root, text='Get Date', command=retrieve_date_via_button)
 
-b.pack()
+get_date_of_selected_date_by_button.pack()
 
 root.mainloop()
 """
