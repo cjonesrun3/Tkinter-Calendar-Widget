@@ -3,7 +3,7 @@
  
  **INSTALL**
  
- Just drop the TreeCalendar directory into your sitepackages and import TreeCalendar. See testing.py for configuration options. 
+ Just drop the TreeCalendar directory into your sitepackages and see the code below as an example of configuration options and use. 
 
 ![alt text](https://github.com/cjonesrun3/Tkinter-Calendar-Widget/blob/master/TreeCalImg.PNG)
 
