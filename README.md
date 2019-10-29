@@ -12,7 +12,7 @@
 ```python
 import tkinter as tk
 from tkinter import ttk
-from TCalendar import TreeCalendar
+from TreeCal import TreeCalendar
 
 def retrieve_date_via_button():
     """
