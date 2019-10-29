@@ -53,6 +53,8 @@ class TreeCalendar(ttk.Frame):
 
         ttk.Frame.__init__(self, master)  # Base frame
         self.style = ttk.Style(self)
+        self._style_prefixe = str(self)  # Ensures styles are unique to individual calendars
+        ttk.Frame.configure(self, style='main.%s.TFrame' % self._style_prefixe)
         self.style.theme_use('clam')  # Ensures treeview initiates with activebackground
         self.currently_displayed_year = StringVar()  # Keeps track of currently displayed year
         self.currently_displayed_month = StringVar()  # Keeps track of currently displayed month
@@ -101,44 +103,49 @@ class TreeCalendar(ttk.Frame):
         selected_fontsize = self._selected_options.get('fontsize')
         selected_arrowsize = self._selected_options.get('arrowsize')
 
-        self.style.layout('L.TButton',
+        self.style.layout('L.%s.TButton' % self._style_prefixe,
                           [('Button.focus',
                             {'children': [('Button.leftarrow', None)]})])
-        self.style.layout('R.TButton',
+        self.style.layout('R.%s.TButton' % self._style_prefixe,
                           [('Button.focus',
                             {'children': [('Button.rightarrow', None)]})])
 
-        self.style.configure('R.TButton', background=selected_background,
+        self.style.configure('R.%s.TButton' % self._style_prefixe, background=selected_background,
                              arrowcolor=selected_foreground, bordercolor=selected_background,
                              relief="flat", lightcolor=selected_background, darkcolor=selected_background,
                              arrowsize=int(selected_arrowsize))
 
-        self.style.configure('L.TButton', background=selected_background, arrowcolor=selected_foreground,
-                             bordercolor=selected_background, relief="flat", lightcolor=selected_background,
-                             darkcolor=selected_background, arrowsize=int(selected_arrowsize))
+        self.style.configure('L.%s.TButton' % self._style_prefixe, background=selected_background,
+                             arrowcolor=selected_foreground, bordercolor=selected_background, relief="flat",
+                             lightcolor=selected_background, darkcolor=selected_background,
+                             arrowsize=int(selected_arrowsize))
 
-        self.style.configure('TFrame', background=selected_background)
+        self.style.configure('%s.TFrame' % self._style_prefixe, background=selected_background)
 
-        self.style.layout('Cal.Treeview')  # Unique designation to avoid interfering with other treeviews
+        self.style.layout('Cal.%s.Treeview' % self._style_prefixe)
+        # Unique designation to avoid interfering with other treeviews
 
-        self.style.configure('Cal.Treeview', background=selected_background, relief='raised',
+        self.style.configure('Cal.%s.Treeview' % self._style_prefixe, background=selected_background, relief='raised',
                              foreground=selected_foreground, activebackground=selected_activebackground,
                              fieldbackground=selected_fieldbackground, font=(selected_font, int(selected_fontsize)))
 
-        self.style.configure('Cal.Treeview.Heading', foreground=selected_foreground, background=selected_background,
-                             activebackground=selected_activebackground, font=(selected_font, int(selected_fontsize)))
+        self.style.configure('Cal.%s.Treeview.Heading' % self._style_prefixe, foreground=selected_foreground,
+                             background=selected_background, activebackground=selected_activebackground,
+                             font=(selected_font, int(selected_fontsize)))
 
-        self.style.configure('TLabel', background=selected_background, font=(selected_font, int(selected_fontsize)))
+        self.style.configure('%s.TLabel' % self._style_prefixe, background=selected_background,
+                             font=(selected_font, int(selected_fontsize)))
 
         # *************************************************************************************************************
         # self.year_frame
         # *************************************************************************************************************
         self.year_frame = ttk.Frame(self)
-        self.year_frame.configure(style='TFrame')
-        self.year_label = ttk.Label(self.year_frame, textvariable=self.currently_displayed_year, style='TLabel')
-        self.year_forward_button = ttk.Button(self.year_frame, style='R.TButton',
+        self.year_frame.configure(style='%s.TFrame' % self._style_prefixe)
+        self.year_label = ttk.Label(self.year_frame, textvariable=self.currently_displayed_year,
+                                    style='%s.TLabel' % self._style_prefixe)
+        self.year_forward_button = ttk.Button(self.year_frame, style='R.%s.TButton' % self._style_prefixe,
                                               command=self._refresh_calendar_year_forward)
-        self.year_back_button = ttk.Button(self.year_frame, style='L.TButton',
+        self.year_back_button = ttk.Button(self.year_frame, style='L.%s.TButton' % self._style_prefixe,
                                            command=self._refresh_calendar_year_back)
 
         self.year_back_button.grid(column=0, row=0)
@@ -149,11 +156,12 @@ class TreeCalendar(ttk.Frame):
         # self.month_frame
         # *************************************************************************************************************
         self.month_frame = ttk.Frame(self)
-        self.month_frame.configure(style='TFrame')
-        self.month_label = ttk.Label(self.month_frame, textvariable=self.currently_displayed_month, style='TLabel')
-        self.month_forward_button = ttk.Button(self.month_frame, style='R.TButton',
+        self.month_frame.configure(style='%s.TFrame' % self._style_prefixe)
+        self.month_label = ttk.Label(self.month_frame, textvariable=self.currently_displayed_month,
+                                     style='%s.TLabel' % self._style_prefixe)
+        self.month_forward_button = ttk.Button(self.month_frame, style='R.%s.TButton' % self._style_prefixe,
                                                command=self._refresh_calendar_month_forward)
-        self.month_back_button = ttk.Button(self.month_frame, style='L.TButton',
+        self.month_back_button = ttk.Button(self.month_frame, style='L.%s.TButton' % self._style_prefixe,
                                             command=self._refresh_calendar_month_back)
 
         self.month_back_button.grid(column=0, row=0)
@@ -163,11 +171,12 @@ class TreeCalendar(ttk.Frame):
         # self.tree_frame
         # *************************************************************************************************************
         self.tree_frame = ttk.Frame(self)
-        self.tree_frame.configure(style='TFrame')
+        self.tree_frame.configure(style='%s.TFrame' % self._style_prefixe)
 
         self.tree_headers = ['Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat', 'Sun']
 
-        self.tree = ttk.Treeview(self.tree_frame, columns=self.tree_headers, style='Cal.Treeview')
+        self.tree = ttk.Treeview(self.tree_frame, columns=self.tree_headers,
+                                 style='Cal.%s.Treeview' % self._style_prefixe)
 
         self.tree['show'] = 'headings'
         self.tree.configure(height=int(self._selected_options.get('calendarheight')))
