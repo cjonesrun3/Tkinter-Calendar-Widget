@@ -373,11 +373,11 @@ class TreeCalendar(ttk.Frame):
         month_back_calendar = calendar.monthcalendar(year, month_back_value)  # Builds calendar for month back
 
         previous_month_amount_of_days = 0  # Amount of days in previous month
-        if numerical_month - 1 == 0:  # Checks to ensure previous month isn't in previous year
+        if numerical_month == 0:  # Checks to ensure previous month isn't in previous year
             previous_month_amount_of_days = calendar.monthrange(year - 1, 12)[1]
             # Subtracts one from year, set month to December and returns only days
         else:
-            previous_month_amount_of_days = calendar.monthrange(year, month_back_value - 1)[1]
+            previous_month_amount_of_days = calendar.monthrange(year, month_back_value)[1]
             # Returns days in previous month
 
         number_of_zero_slots_for_beggining_of_month = month_back_calendar[0].count(0)  # See below
